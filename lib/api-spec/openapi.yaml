@@ -3,20 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Roblox public profile lookup API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: roblox
+    description: Roblox public profile data
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +25,151 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /roblox/lookup:
+    get:
+      operationId: lookupUser
+      tags: [roblox]
+      summary: Lookup a Roblox user by username
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Lookup result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LookupResult"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /roblox/users/{userId}:
+    get:
+      operationId: getUserProfile
+      tags: [roblox]
+      summary: Get a Roblox user profile bundle
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Profile bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+  /roblox/users/{userId}/friends:
+    get:
+      operationId: getUserFriends
+      tags: [roblox]
+      summary: Get a Roblox user's friends
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Friends list with thumbnails
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FriendsResponse"
+  /roblox/users/{userId}/games:
+    get:
+      operationId: getUserGames
+      tags: [roblox]
+      summary: Get games created by a Roblox user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Games list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GamesResponse"
+  /roblox/users/{userId}/badges:
+    get:
+      operationId: getUserBadges
+      tags: [roblox]
+      summary: Get badges earned by a Roblox user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Badges list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadgesResponse"
+  /roblox/users/{userId}/groups:
+    get:
+      operationId: getUserGroups
+      tags: [roblox]
+      summary: Get groups a Roblox user belongs to
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Groups list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupsResponse"
+  /roblox/search:
+    get:
+      operationId: searchUsers
+      tags: [roblox]
+      summary: Search Roblox users by keyword
+      parameters:
+        - in: query
+          name: keyword
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Search results with thumbnails
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
 components:
   schemas:
     HealthStatus:
@@ -31,6 +177,232 @@ components:
       properties:
         status:
           type: string
+      required: [status]
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+    LookupResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        displayName:
+          type: string
+      required: [id, name, displayName]
+    Presence:
+      type: object
+      properties:
+        userPresenceType:
+          type: integer
+          description: "0 offline, 1 online, 2 in-game, 3 in studio, 4 invisible"
+        lastLocation:
+          type: string
+          nullable: true
+        lastOnline:
+          type: string
+          nullable: true
+        placeId:
+          type: integer
+          format: int64
+          nullable: true
+        gameId:
+          type: string
+          nullable: true
+      required: [userPresenceType]
+    RobloxBadge:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+      required: [id, name, description, imageUrl]
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        created:
+          type: string
+        isBanned:
+          type: boolean
+        externalAppDisplayName:
+          type: string
+          nullable: true
+        hasVerifiedBadge:
+          type: boolean
+        avatarHeadshotUrl:
+          type: string
+        avatarFullUrl:
+          type: string
+        friendsCount:
+          type: integer
+        followersCount:
+          type: integer
+        followingCount:
+          type: integer
+        presence:
+          $ref: "#/components/schemas/Presence"
+        robloxBadges:
+          type: array
+          items:
+            $ref: "#/components/schemas/RobloxBadge"
+        previousUsernames:
+          type: array
+          items:
+            type: string
       required:
-        - status
-
+        - id
+        - name
+        - displayName
+        - description
+        - created
+        - isBanned
+        - hasVerifiedBadge
+        - avatarHeadshotUrl
+        - avatarFullUrl
+        - friendsCount
+        - followersCount
+        - followingCount
+        - presence
+        - robloxBadges
+        - previousUsernames
+    Friend:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        displayName:
+          type: string
+        hasVerifiedBadge:
+          type: boolean
+        avatarHeadshotUrl:
+          type: string
+      required: [id, name, displayName, hasVerifiedBadge, avatarHeadshotUrl]
+    FriendsResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        friends:
+          type: array
+          items:
+            $ref: "#/components/schemas/Friend"
+      required: [total, friends]
+    Game:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        placeVisits:
+          type: integer
+          format: int64
+        thumbnailUrl:
+          type: string
+          nullable: true
+      required: [id, name, placeVisits]
+    GamesResponse:
+      type: object
+      properties:
+        games:
+          type: array
+          items:
+            $ref: "#/components/schemas/Game"
+      required: [games]
+    Badge:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        iconImageUrl:
+          type: string
+          nullable: true
+        awardedDate:
+          type: string
+          nullable: true
+      required: [id, name]
+    BadgesResponse:
+      type: object
+      properties:
+        badges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Badge"
+      required: [badges]
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        memberCount:
+          type: integer
+        role:
+          type: string
+        emblemUrl:
+          type: string
+          nullable: true
+      required: [id, name, memberCount, role]
+    GroupsResponse:
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/Group"
+      required: [groups]
+    SearchUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        displayName:
+          type: string
+        hasVerifiedBadge:
+          type: boolean
+        avatarHeadshotUrl:
+          type: string
+      required: [id, name, displayName, hasVerifiedBadge, avatarHeadshotUrl]
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchUser"
+      required: [results]

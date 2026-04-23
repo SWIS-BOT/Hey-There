@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface Group {
+  id: number;
+  name: string;
+  memberCount: number;
+  role: string;
+  emblemUrl?: string | null;
 }

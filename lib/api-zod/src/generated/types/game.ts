@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface Game {
+  id: bigint;
+  name: string;
+  description?: string | null;
+  placeVisits: bigint;
+  thumbnailUrl?: string | null;
 }

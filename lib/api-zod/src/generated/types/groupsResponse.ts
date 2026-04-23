@@ -5,7 +5,8 @@
  * Roblox public profile lookup API
  * OpenAPI spec version: 0.1.0
  */
+import type { Group } from "./group";
 
-export interface HealthStatus {
-  status: string;
+export interface GroupsResponse {
+  groups: Group[];
 }

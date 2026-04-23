@@ -5,7 +5,9 @@
  * Roblox public profile lookup API
  * OpenAPI spec version: 0.1.0
  */
+import type { Friend } from "./friend";
 
-export interface HealthStatus {
-  status: string;
+export interface FriendsResponse {
+  total: number;
+  friends: Friend[];
 }

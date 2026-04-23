@@ -5,7 +5,8 @@
  * Roblox public profile lookup API
  * OpenAPI spec version: 0.1.0
  */
+import type { Game } from "./game";
 
-export interface HealthStatus {
-  status: string;
+export interface GamesResponse {
+  games: Game[];
 }
